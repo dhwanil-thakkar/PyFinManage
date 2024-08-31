@@ -1,0 +1,2 @@
+# PyFinManage
+Financial Portfolio Manager
