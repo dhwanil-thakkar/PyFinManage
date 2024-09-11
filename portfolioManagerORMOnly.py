@@ -4,8 +4,9 @@ from db_models import DB_Investment, DB_Portfolio, SessionLocal
 from datetime import datetime
 from yfinance_utils import get_current_price, get_stock_name
 
-# To print using tabulate
-# from tabulate import tabulate    
+
+
+
 
 class Stock(DB_Investment):
     # def __init__(self, ticker_symbol: str, name: str = None, average_price_per_unit: float = 0,number_of_stocks_owned:float = 0, current_market_price: float = 0, market_price_refresh_timestamp: datetime = datetime(1970,1,1)):

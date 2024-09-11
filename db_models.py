@@ -1,19 +1,16 @@
 from typing import List
 from typing import Optional
 from sqlalchemy import ForeignKey
-from sqlalchemy import String
+from sqlalchemy import String, Integer, Float, DateTime, UniqueConstraint
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import DeclarativeBase , relationship
+from sqlalchemy.orm import Mapped, mapped_column 
+from sqlalchemy.orm import sessionmaker, Session
 
 from datetime import datetime
 
 DATABASE_URL = 'sqlite:///./portfolio.db'
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 class Base(DeclarativeBase):
@@ -22,23 +19,25 @@ class Base(DeclarativeBase):
 class DB_Portfolio(Base):
     __tablename__ = 'portfolios'
 
-    portfolio_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] =  mapped_column(unique=True)
-    investments: Mapped[List["DB_Investment"]] = relationship("DB_Investment", back_populates="portfolio")
+    portfolio_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] =  mapped_column(String, unique=True)
+    investments: Mapped[List["Investments"]] = relationship("DB_Investment", back_populates="portfolio")
 
 class DB_Investment(Base):
     __tablename__ = "investments"
 
-    investment_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    ticker_symbol: Mapped[str] = mapped_column()
-    name: Mapped[str] = mapped_column()
-    average_price_per_unit: Mapped[float] = mapped_column()
-    number_of_stocks_owned: Mapped[float] = mapped_column()
-    current_market_price: Mapped[float] = mapped_column()
-    market_price_refresh_timestamp : Mapped[datetime] = mapped_column()
-    portfolio_id: Mapped[int] = mapped_column(ForeignKey("portfolios.portfolio_id"))
+    investment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ticker_symbol: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String)
+    average_price_per_unit: Mapped[float] = mapped_column(Float)
+    number_of_stocks_owned: Mapped[float] = mapped_column(Float)
+    current_market_price: Mapped[float] = mapped_column(Float)
+    market_price_refresh_timestamp : Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    portfolio_id: Mapped[int] = mapped_column(Integer, ForeignKey("portfolios.portfolio_id"))
 
     portfolio: Mapped["DB_Portfolio"] = relationship("DB_Portfolio", back_populates='investments')
+
+    __table_args_ = (UniqueConstraint('portfolio_id', 'ticker_symbol', name='unique_portfolio_investment'))
 
 
 # Create DDL 
