@@ -9,6 +9,13 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from datetime import datetime
 
+import logging
+from setup_logger import get_logger
+logger = get_logger(__file__)
+logging.getLogger('sqlalchemy.engine').handlers = logger.handlers
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+
 DATABASE_URL = 'sqlite:///./portfolio.db'
 engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
@@ -21,18 +28,21 @@ class DB_Portfolio(Base):
 
     portfolio_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] =  mapped_column(String, unique=True)
+
     investments: Mapped[List["Investments"]] = relationship("DB_Investment", back_populates="portfolio")
 
 class DB_Investment(Base):
     __tablename__ = "investments"
 
     investment_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    
     ticker_symbol: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
     average_price_per_unit: Mapped[float] = mapped_column(Float)
     number_of_stocks_owned: Mapped[float] = mapped_column(Float)
     current_market_price: Mapped[float] = mapped_column(Float)
     market_price_refresh_timestamp : Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
     portfolio_id: Mapped[int] = mapped_column(Integer, ForeignKey("portfolios.portfolio_id"))
 
     portfolio: Mapped["DB_Portfolio"] = relationship("DB_Portfolio", back_populates='investments')
@@ -44,31 +54,3 @@ class DB_Investment(Base):
 Base.metadata.create_all(engine)
 
 
-## how to use these db_models
-
-# with SessionLocal() as session:
-
-#     portfolio_1 = Portfolio()
-
-#     Apple_investment = Investment(
-#         ticker_symbol = "APPL",
-#         name = "Apple",
-#         average_price_per_unit = 150.0,
-#         number_of_stocks_owned = 10,
-#         current_market_price = 155.43,
-#         market_price_refresh_timestamp = datetime.now(),
-#         portfolio = portfolio_1
-#     )
-
-#     session.add(portfolio_1)
-#     session.add(Apple_investment)
-#     session.commit()
-
-#     #Query
-
-#     portfolio = session.query(Portfolio).first()
-#     investments = session.query(Investment).all()
-
-#     print(f"Portfolio ID: {portfolio.portfolio_id}")
-#     for investment in investments:
-#          print(f"Investment Ticker: {investment.ticker_symbol}, Name: {investment.name}")
