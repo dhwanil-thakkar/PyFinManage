@@ -52,24 +52,24 @@ def update_investment(portfolio: DB_Portfolio, investmentDetails: InvestmentDeta
     investment = get_investment(portfolio=portfolio, investmentDetails=investmentDetails, db=db)
     logger.debug(f"investment in update investment: {investment}")
 
-    update_Stmt = (
+    update_stmt = (
         update(DB_Investment)
         .where(
             (DB_Investment.ticker_symbol == investmentDetails.ticker_symbol) &
             (investment.portfolio_id == portfolio.portfolio_id)
         )
         .values(
-            average_price_per_unit=calc_avg_price(investmentDetails.average_price_per_unit), ##Calc fn()
-            number_of_stocks_owned=calc_new_stock_inventory(investmentDetails.number_of_units), ##Add Func()
+            average_price_per_unit=calc_avg_price(investment=investment, investmentDetails=investmentDetails), ##Calc fn()
+            number_of_stocks_owned=calc_new_stock_inventory(investment=investment, investmentDetails=investmentDetails), ##Add Func()
             current_market_price=get_current_price(ticker_symbol=investmentDetails.ticker_symbol),
             market_price_refresh_timestamp=datetime.now(),
         )
     )
-    logger.debug(f"update Statement {update_Stmt}")
+    logger.debug(f"update Statement {update_stmt}")
 
     try:
-        db.execute(stmt)
-        db_commit()
+        db.execute(update_stmt)
+        db.commit()
         return investment
     except Exception as e:
         logger.error(f"Error updating investment: {3}")
@@ -85,10 +85,13 @@ def calc_avg_price(investment: DB_Investment, investmentDetails: InvestmentDetai
         + (investmentDetails.average_price_per_unit * investmentDetails.number_of_units))
         /(investment.number_of_stocks_owned + investmentDetails.number_of_units)
     )
-    return investment
+    return investment.average_price_per_unit
 
-def calc_new_stock_inventory(foo):
-    return foo
+def calc_new_stock_inventory(investment: DB_Investment, investmentDetails: InvestmentDetails):
+
+    investment.number_of_stocks_owned = (investment.number_of_stocks_owned + investmentDetails.number_of_units)
+
+    return investment.number_of_stocks_owned
 
 
 
