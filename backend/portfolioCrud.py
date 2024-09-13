@@ -1,8 +1,6 @@
 from db_models import SessionLocal
 from db_models import DB_Investment, DB_Portfolio
 
-from validatonModels import StockTransactionDetails
-
 from sqlalchemy import select, insert
 
 from setup_logger import get_logger
@@ -15,8 +13,8 @@ def create_new_portfolio(name:str, db:SessionLocal):
         existing_portfolio = db.execute(select_stmt).scalars().first() 
         if existing_portfolio:
             raise ValueError("Portfolio with the same name Already Exists")
-        session.execute(insert_stmt)
-        session.commit()
+        db.execute(insert_stmt)
+        db.commit()
         return {"message":f"Protfolio '{name}' created successfully"}
 
 def get_portfolio(name: str, db: SessionLocal):

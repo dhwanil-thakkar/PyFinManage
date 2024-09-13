@@ -18,5 +18,5 @@ class InvestmentDetails(BaseModel):
     average_price_per_unit: float
     number_of_units: float
 
-class StockTransactionDetails(InvestmentDetails):
+class InvestmentTransactionDetails(InvestmentDetails):
     action: ActionType

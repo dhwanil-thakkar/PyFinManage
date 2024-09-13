@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
 from db_models import SessionLocal, DB_Investment, DB_Portfolio
 #from portfolioManager import Portfolio, Stock
 
-from validatonModels import StockTransactionDetails, ActionType
-from portfolioCrud import get_all_portfolios, create_new_portfolio, get_all_investments
+from validatonModels import InvestmentTransactionDetails, ActionType
+from portfolioCrud import get_all_portfolios, create_new_portfolio, get_all_investments, get_portfolio
 from investmentCrud import buy_investment_to_portfolio, sell_investment_from_portfolio
 
 
@@ -14,6 +16,15 @@ logger = get_logger(__file__)
 
 
 app = FastAPI()
+
+# Middleware for CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_db():
@@ -37,7 +48,7 @@ def create_portfolio(name: str, db: SessionLocal = Depends(get_db)):
 @app.get("/portfolio/{name}")
 def fetch_portfolio_details(name: str, db: SessionLocal = Depends(get_db)):
     try:
-        portfolio = get_portfolio(name=name)
+        portfolio = get_portfolio(name=name, db=db)
         return {"PorfolioDetails": portfolio}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -61,21 +72,27 @@ def get_portfolio_investements(name: str, limit: int = 50, db: SessionLocal = De
         raise HTTPException(status_code=400,detail=str(e))
 
 @app.post("/portfolio/{portfolio_name}/transaction")
-def add_or_remove_stock_to_portfolio(portfolio_name:str, transactionDetails: StockTransactionDetails, db: SessionLocal = Depends(get_db)):
+def add_or_remove_stock_to_portfolio(portfolio_name:str, investmentTransactionDetails: InvestmentTransactionDetails, db: SessionLocal = Depends(get_db)):
     try:
-#        db_portfolio = Portfolio.get_portfolio(name=portfolio_name)
-#        portfolio = Portfolio(name=db_portfolio.name)
-        logger.debug(transactionDetails)
-        if transactionDetails.action == ActionType.buy:
-            result = buy_investment_to_portfolio(portfolio_name = portfolio_name ,db=db, transactionDetails = transactionDetails)
-            return {f"Stock updated in portfolio: {result}"}
-        elif transactionDetails.action == ActionType.sell:
-            result = sell_investment_from_portfolio(portfolio_name = portfolio_name, db = db, transactionDetails = transactionDetails)
-            return {f"stock sold in portfolio: {result}" }
+        portfolio = get_portfolio(name=portfolio_name, db=db)
+
+#       logger.debug(transactionDetails)
+        if investmentTransactionDetails.action == ActionType.buy:
+            result = buy_investment_to_portfolio(portfolio=portfolio, db=db, investmentTransactionDetails=investmentTransactionDetails)
+            return {
+                f"portfolio : {portfolio.to_dict()}",
+                f"Investments: {result.to_dict()}",
+            }
+        elif investmentTransactionDetails.action == ActionType.sell:
+            result = sell_investment_from_portfolio(portfolio=portfolio, db=db, investmentTransactionDetails=investmentTransactionDetails)
+            return {
+                f"portfolio : {portfolio.to_dict()}",
+                f"Investments: {result.to_dict()}",
+            }
         else:
             raise HTTPException(status_code=404, detail="Invalid Action")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail="Error Processing Trasaction: " + str(e))
         
 
 

@@ -31,6 +31,12 @@ class DB_Portfolio(Base):
 
     investments: Mapped[List["Investments"]] = relationship("DB_Investment", back_populates="portfolio")
 
+    def to_dict(self):
+        return {
+            f"portfolio_id: {self.portfolio_id}",
+            f"name: {self.name}"
+        }
+
 class DB_Investment(Base):
     __tablename__ = "investments"
 
@@ -48,6 +54,19 @@ class DB_Investment(Base):
     portfolio: Mapped["DB_Portfolio"] = relationship("DB_Portfolio", back_populates='investments')
 
     __table_args_ = (UniqueConstraint('portfolio_id', 'ticker_symbol', name='unique_portfolio_investment'))
+
+
+    def to_dict(self):
+        return {
+                "investment_id": self.investment_id,
+                "ticker_symbol": self.ticker_symbol,
+                "name": self.name,
+                "average_price_per_unit": self.average_price_per_unit,
+                "number_of_stocks_owned": self.number_of_stocks_owned,
+                "current_market_price": self.current_market_price,
+                "market_price_refresh_timestamp": self.market_price_refresh_timestamp,
+                "market_price_refresh_timestamp": self.market_price_refresh_timestamp,
+            }
 
 
 # Create DDL 
