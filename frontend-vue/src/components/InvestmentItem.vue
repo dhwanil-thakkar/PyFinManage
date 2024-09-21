@@ -1,11 +1,12 @@
+<!-- InvestmentItem.vue -->
 <template>
     <div class="investment-item p-6 bg-white rounded-lg shadow-md transition-transform transform hover:scale-105">
       <div class="investment-info p-4">
         <h3 class="text-xl font-semibold text-gray-800">{{ investment.name }} ({{ investment.ticker_symbol }})</h3>
-        <p class="text-gray-600">Average Price Per Unit: <span class="font-medium">{{ investment.average_price_per_unit }}</span></p>
-        <p class="text-gray-600">Current Market Price: <span class="font-medium">{{ investment.current_market_price }}</span></p>
-        <p class="text-gray-600">Number of Stocks Owned: <span class="font-medium">{{ investment.number_of_stocks_owned }}</span></p>
-        <p class="text-gray-600">Last Updated: <span class="font-medium">{{ new Date(investment.market_price_refresh_timestamp).toLocaleString() }}</span></p>
+        <p class="">Average Price Per Unit: <span class="font-medium">{{ investment.average_price_per_unit }}</span></p>
+        <p class="">Current Market Price: <span class="font-medium">{{ investment.current_market_price }}</span></p>
+        <p class="">Number of Stocks Owned: <span class="font-medium">{{ investment.number_of_stocks_owned }}</span></p>
+        <p class="">Last Updated: <span class="font-medium">{{ new Date(investment.market_price_refresh_timestamp).toLocaleString() }}</span></p>
       </div>
   
       <button @click="toggleExpand" class="mt-4 w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition">

@@ -13,11 +13,30 @@
 
 
     <div v-if="investments.length" class="flex flex-col space-y-8 m-8 p-8 ">
-      <InvestmentItem 
+      <!-- <InvestmentItem 
         v-for="investment in investments" 
         :key="investment.investment_id" 
         :investment="investment" 
-      />
+      /> -->
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-100">
+            <th>Name</th>
+            <th>Average Price</th>
+            <th>Current Price</th>
+            <th>Quantity </th>
+            <th>Last Updated At </th>
+            <th>Actions </th>
+          </tr>
+        </thead>
+        <tbody>
+          <InvestmentItemTableFormat
+            v-for="investment in investments" 
+            :key="investment.investment_id" 
+            :investment="investment" 
+          />
+        </tbody>
+      </table>
     </div>
     
     <!-- Display a message if there are no investments -->
@@ -30,6 +49,7 @@
   <script>
   import axios from 'axios';
   import InvestmentItem from './InvestmentItem.vue';
+  import InvestmentItemTableFormat from './InvestmentItemTableFormat.vue';
 
   export default {
     props: {
@@ -39,7 +59,8 @@
       }
     },
     components: {
-      InvestmentItem
+      InvestmentItem,
+      InvestmentItemTableFormat
     },
     data(){
       return{
