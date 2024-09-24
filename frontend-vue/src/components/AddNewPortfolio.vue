@@ -78,9 +78,9 @@
       toggle(){
         this.addPortfolioToggle = !this.addPortfolioToggle
       },
-      selectPortfolio(portfolio) {
-        this.$emit('portfolio-selected', portfolio); // Emit an event with the selected portfolio
-      }
+      // selectPortfolio(portfolio) {
+      //   this.$emit('portfolio-selected', portfolio); // Emit an event with the selected portfolio
+      // }
     }
   };
 </script>
