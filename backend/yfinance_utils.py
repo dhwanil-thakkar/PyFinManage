@@ -21,4 +21,4 @@ def get_stock_name(ticker_symbol: str) -> str:
         return yf.Ticker(ticker_symbol).info[yfinance_name_key]
     except Exception as e:
         logger.error("Unable to Fetch Name")
-        return 0.0
+        return ("Unable to lookup on yahoo finance")

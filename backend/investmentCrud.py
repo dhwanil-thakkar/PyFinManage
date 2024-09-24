@@ -6,7 +6,7 @@ from validatonModels import InvestmentTransactionDetails, ActionType
 from yfinance_utils import get_current_price, get_stock_name
 from portfolioCrud import get_portfolio
 
-from sqlalchemy import select, insert, update
+from sqlalchemy import select, insert, update, delete
 
 from datetime import datetime
 
@@ -78,6 +78,15 @@ def update_investment(portfolio: DB_Portfolio, investment: DB_Investment, invest
         db.rollback()
         raise
 
+def remove_investment_from_portfolio(investment: DB_Investment, db: SessionLocal):
+    try:
+        delete_stmt= delete(DB_Investment).where(DB_Investment.investment_id == investment.investment_id)
+        result = db.execute(delete_stmt)
+        db.commit()
+        logger.debug(f"remove_result: {result}")
+        return None
+    except Exception as e:
+        raise RuntimeError ("Error Occured removing investment from the database, Try again later.")
 
 
 def calc_avg_price(investment: DB_Investment, investmentTransactionDetails: InvestmentTransactionDetails):
@@ -148,10 +157,15 @@ def buy_investment_to_portfolio(portfolio: DB_Portfolio, investmentTransactionDe
     
 
 
+
 def sell_investment_from_portfolio (portfolio: DB_Portfolio, investmentTransactionDetails: InvestmentTransactionDetails, db: SessionLocal):
     try:
         investment = get_investment_from_portfolio(portfolio=portfolio, investmentTransactionDetails=investmentTransactionDetails, db=db)
         logger.debug(f"Investment in sell_investment: {investment}")
+
+
+        if not investment:
+            raise ValueError("No Investment Found")
 
         if (investmentTransactionDetails.average_price_per_unit <=0):
             raise ValueError("Average price per unit of the needs to be greater than 0")
@@ -161,9 +175,10 @@ def sell_investment_from_portfolio (portfolio: DB_Portfolio, investmentTransacti
         
         if (investmentTransactionDetails.number_of_units > investment.number_of_stocks_owned):
             raise ValueError(f"Cannot sell more than you own in the portfolio, current quantity: {investment.number_of_stocks_owned}")
-        
-        if not investment:
-            raise ValueError("No Investment Found")
+
+        if (investmentTransactionDetails.number_of_units == investment.number_of_stocks_owned):
+            result = remove_investment_from_portfolio(investment=investment, db=db)
+            return result
 
         if investment:
             result = update_investment(portfolio=portfolio, investment=investment, investmentTransactionDetails=investmentTransactionDetails, db=db)

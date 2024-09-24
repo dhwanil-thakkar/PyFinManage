@@ -85,6 +85,13 @@ def add_or_remove_stock_to_portfolio(portfolio_name:str, investmentTransactionDe
             }
         elif investmentTransactionDetails.action == ActionType.sell:
             result = sell_investment_from_portfolio(portfolio=portfolio, db=db, investmentTransactionDetails=investmentTransactionDetails)
+
+            if result is None:
+                return {
+                    f"portfolio: {portfolio.to_dict()}",
+                    f"Investments: None"
+                }
+
             return {
                 f"portfolio : {portfolio.to_dict()}",
                 f"Investments: {result.to_dict()}",
