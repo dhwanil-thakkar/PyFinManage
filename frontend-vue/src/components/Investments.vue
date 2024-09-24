@@ -1,32 +1,34 @@
-<!-- Investments.vue -->
+<!-- Investments in a portfolio.vue -->
 <template>
     <div id="InvestmentsContainer" class="container p-4">
       
       
       <h2 class="text-4xl p-4">Selected Portfolio: {{ selectedPortfolioName || 'Please click on a portfolio to select' }}</h2>
       
-      
-      
-      <button @click="fetchAllInvestments" class="border bg-black m-4 p-4 text-white">
-        Click Here to refresh investments
-      </button>
+      <div id="Porfolio-actions" class="flex justify-between">
 
+        <button @click="fetchAllInvestments" class="border bg-black  m-4 p-4 text-white">
+          Click Here to refresh investments
+        </button>
+
+        <div v-if="selectedPortfolioName">
+          <BuyOrSellInvestmentPopUp
+            :selectedPortfolio = "selectedPortfolioName"
+          />
+        </div>
+      </div>
+      
 
     <div v-if="investments.length" class="flex flex-col space-y-8 m-8 p-8 ">
-      <!-- <InvestmentItem 
-        v-for="investment in investments" 
-        :key="investment.investment_id" 
-        :investment="investment" 
-      /> -->
       <table class="w-full">
         <thead>
           <tr class="bg-gray-100">
             <th>Name</th>
-            <th>Average Price</th>
-            <th>Current Price</th>
             <th>Quantity </th>
+            <th>Average Price</th>
+            <th>Market Price</th>
+            <th>+/- % Change</th>
             <th>Last Updated At </th>
-            <th>Actions </th>
           </tr>
         </thead>
         <tbody>
@@ -48,8 +50,8 @@
   
   <script>
   import axios from 'axios';
-  import InvestmentItem from './InvestmentItem.vue';
   import InvestmentItemTableFormat from './InvestmentItemTableFormat.vue';
+  import BuyOrSellInvestmentPopUp from './BuyOrSellInvestmentPopUp.vue';
 
   export default {
     props: {
@@ -59,8 +61,8 @@
       }
     },
     components: {
-      InvestmentItem,
-      InvestmentItemTableFormat
+      InvestmentItemTableFormat,
+      BuyOrSellInvestmentPopUp
     },
     data(){
       return{
@@ -78,8 +80,13 @@
           console.log('Error: ', error)
         });
       },
-      SelectInvestment(){
-        this.$emit('investment-selected', investment);    // Emit an event with the selected investment
+    },
+    watch: {
+      selectedPortfolioName(newVal) {
+        this.investment = [];
+        if(newVal) {
+          this.fetchAllInvestments();
+        }
       }
     }
   };
