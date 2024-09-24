@@ -7,6 +7,9 @@ from sqlalchemy.orm import DeclarativeBase , relationship
 from sqlalchemy.orm import Mapped, mapped_column 
 from sqlalchemy.orm import sessionmaker, Session
 
+from sqlalchemy.orm import validates
+
+
 from datetime import datetime
 
 import logging
@@ -53,7 +56,12 @@ class DB_Investment(Base):
 
     portfolio: Mapped["DB_Portfolio"] = relationship("DB_Portfolio", back_populates='investments')
 
-    __table_args_ = (UniqueConstraint('portfolio_id', 'ticker_symbol', name='unique_portfolio_investment'))
+    __table_args__ = (UniqueConstraint('portfolio_id', 'ticker_symbol', name='unique_portfolio_investment'),)
+
+
+    @validates("ticker_symbol")
+    def validate_ticker_symbol(self, key, value):
+        return value.upper()
 
 
     def to_dict(self):
@@ -67,6 +75,7 @@ class DB_Investment(Base):
                 "market_price_refresh_timestamp": self.market_price_refresh_timestamp,
                 "market_price_refresh_timestamp": self.market_price_refresh_timestamp,
             }
+
 
 
 # Create DDL 
